@@ -1,0 +1,48 @@
+# yaml-language-server: $schema=./node_modules/envio/evm.schema.json
+name: envio-indexer
+networks:
+- id: 10
+  start_block: 0
+  contracts:
+  - name: QuestChainFactory
+    address:
+    - 0x0d006D9e862B362180eb602e5973Fd1fdb6f78dd
+    handler: src/EventHandlers.ts
+    events:
+    - event: AdminReplaceProposed(address proposedAdmin)
+    - event: AdminReplaced(address admin)
+    - event: PaymentTokenReplaceProposed(address proposedPaymentToken)
+    - event: PaymentTokenReplaced(address paymentToken)
+    - event: QuestChainCreated(uint256 index, address questChain)
+    - event: QuestChainUpgraded(address sender, address questChain)
+    - event: UpgradeFeeReplaceProposed(uint256 proposedUpgradeFee)
+    - event: UpgradeFeeReplaced(uint256 upgradeFee)
+  - name: QuestChain
+    address:
+    - 0xC5893DcAB9AD32Fa47923FEbdE89883C62BfFbd6
+    handler: src/EventHandlers.ts
+    events:
+    - event: ConfiguredQuests(address editor, uint256[] questIdList, (bool,bool,bool)[] questDetails)
+    - event: Paused(address account)
+    - event: QuestChainEdited(address editor, string details)
+    - event: QuestChainInit(string details, string[] quests, bool paused)
+    - event: QuestChainTokenURIUpdated(string tokenURI)
+    - event: QuestProofsReviewed(address reviewer, address[] questerList, uint256[] questIdList, bool[] successList, string[] detailsList)
+    - event: QuestProofsSubmitted(address quester, uint256[] questIdList, string[] proofList)
+    - event: QuestsCreated(address creator, string[] detailsList)
+    - event: QuestsEdited(address editor, uint256[] questIdList, string[] detailsList)
+    - event: RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole)
+    - event: RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)
+    - event: RoleRevoked(bytes32 indexed role, address indexed account, address indexed sender)
+    - event: SetLimiter(address limiterContract)
+    - event: Unpaused(address account)
+  - name: QuestChainToken
+    address:
+    - 0x9Cc7e3e12F242D7934Bb32e1918562664DBb4825
+    handler: src/EventHandlers.ts
+    events:
+    - event: ApprovalForAll(address indexed account, address indexed operator, bool approved)
+    - event: TransferBatch(address indexed operator, address indexed from, address indexed to, uint256[] ids, uint256[] values)
+    - event: TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value)
+    - event: URI(string value, uint256 indexed id)
+rollback_on_reorg: false

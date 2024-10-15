@@ -1,0 +1,60 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .:
+    devDependencies:
+      envio:
+        specifier: ^2.4.4
+        version: 2.4.4
+
+packages:
+
+  envio-darwin-arm64@2.4.4:
+    resolution: {integrity: sha512-LGOYDF9Ql/HdnNONUZN+SNqSWJ9h0kWT3IHg+BcCtYjLy0Xo23qEbzJin+qEdgha0MT3+A0NShHDV/E4vNdxPQ==}
+    cpu: [arm64]
+    os: [darwin]
+
+  envio-darwin-x64@2.4.4:
+    resolution: {integrity: sha512-VcNQ4OWefCUyA4+nnINMZ8mhTfxDqBv9g67tYGRd+jIalt5sQtuZO0AXOaFi7Fuq+fT+mZRwKmri545uyhe59g==}
+    cpu: [x64]
+    os: [darwin]
+
+  envio-linux-arm64@2.4.4:
+    resolution: {integrity: sha512-UNnaeiOLBeRqSyFTJa59Zat1SclRTAZHj3M9UjFpiyuALnOJkY3b+SzCMzL93KXjx9Wnuokm0y5P85hhyKXMJw==}
+    cpu: [arm64]
+    os: [linux]
+
+  envio-linux-x64@2.4.4:
+    resolution: {integrity: sha512-yItczUkuExhB8Mc/kUoZpiye4dhmSDtHAt5+KLU6voGLLq2lCknhS3FruymYIubqCl/i2/ne0JyZND2/1n6jeg==}
+    cpu: [x64]
+    os: [linux]
+
+  envio@2.4.4:
+    resolution: {integrity: sha512-4ZtUOgBZ8l2cDnmRW0d60AQ/A5q4DxfDd7I1MQxQiD48Pu5P/H/z6QPk2D7QdE2iza/T0IIVvmTCoubZGURVEw==}
+    hasBin: true
+
+snapshots:
+
+  envio-darwin-arm64@2.4.4:
+    optional: true
+
+  envio-darwin-x64@2.4.4:
+    optional: true
+
+  envio-linux-arm64@2.4.4:
+    optional: true
+
+  envio-linux-x64@2.4.4:
+    optional: true
+
+  envio@2.4.4:
+    optionalDependencies:
+      envio-darwin-arm64: 2.4.4
+      envio-darwin-x64: 2.4.4
+      envio-linux-arm64: 2.4.4
+      envio-linux-x64: 2.4.4

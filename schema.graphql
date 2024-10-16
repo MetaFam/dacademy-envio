@@ -1,0 +1,189 @@
+type Book {
+  id: ID!
+  status: String!
+  slug: String!
+  title: String!
+  introduction: String
+  Chapters: [Chapter!]! @derivedFrom(field: "id")
+  updatedAt: Timestamp
+  contract: Bytes
+  nft: NFT
+  creator: Bytes
+  owners: [Bytes!]
+  reader: Bytes
+}
+
+type NFT {
+  id: ID!
+  address: Bytes!
+  image: String!
+  minted: Boolean
+}
+
+type Chapter {
+  id: ID!
+  optional: Boolean
+  title: String
+  content: String
+  status: ChapterStatus
+}
+
+enum ChapterStatus {
+  PASS
+  FAIL
+  REVIEW
+  INIT
+}
+
+type QuestChain_Initialized {
+  id: ID!
+  version: BigInt!
+}
+
+type QuestChain_Paused {
+  id: ID!
+  account: String!
+}
+
+type QuestChain_QuestChainEdited {
+  id: ID!
+  editor: String!
+  details: String!
+}
+
+type QuestChain_QuestChainInit {
+  id: ID!
+  details: String!
+  quests: [String!]!
+  paused: Boolean!
+}
+
+type QuestChain_QuestChainTokenURIUpdated {
+  id: ID!
+  tokenURI: String!
+}
+
+type QuestChain_QuestProofsSubmitted {
+  id: ID!
+  quester: String!
+  questIdList: [BigInt!]!
+  proofList: [String!]!
+}
+
+type QuestChain_QuestsCreated {
+  id: ID!
+  creator: String!
+  detailsList: [String!]!
+}
+
+type QuestChain_QuestsEdited {
+  id: ID!
+  editor: String!
+  questIdList: [BigInt!]!
+  detailsList: [String!]!
+}
+
+type QuestChain_RoleAdminChanged {
+  id: ID!
+  role: String!
+  previousAdminRole: String!
+  newAdminRole: String!
+}
+
+type QuestChain_RoleGranted {
+  id: ID!
+  role: String!
+  account: String!
+  sender: String!
+}
+
+type QuestChain_RoleRevoked {
+  id: ID!
+  role: String!
+  account: String!
+  sender: String!
+}
+
+type QuestChain_SetLimiter {
+  id: ID!
+  limiterContract: String!
+}
+
+type QuestChain_Unpaused {
+  id: ID!
+  account: String!
+}
+
+type QuestChainFactory_AdminReplaceProposed {
+  id: ID!
+  proposedAdmin: String!
+}
+
+type QuestChainFactory_AdminReplaced {
+  id: ID!
+  admin: String!
+}
+
+type QuestChainFactory_PaymentTokenReplaceProposed {
+  id: ID!
+  proposedPaymentToken: String!
+}
+
+type QuestChainFactory_PaymentTokenReplaced {
+  id: ID!
+  paymentToken: String!
+}
+
+type QuestChainFactory_QuestChainCreated {
+  id: ID!
+  index: BigInt!
+  questChain: String!
+}
+
+type QuestChainFactory_QuestChainUpgraded {
+  id: ID!
+  sender: String!
+  questChain: String!
+}
+
+type QuestChainFactory_UpgradeFeeReplaceProposed {
+  id: ID!
+  proposedUpgradeFee: BigInt!
+}
+
+type QuestChainFactory_UpgradeFeeReplaced {
+  id: ID!
+  upgradeFee: BigInt!
+}
+
+type QuestChainToken_ApprovalForAll {
+  id: ID!
+  account: String!
+  operator: String!
+  approved: Boolean!
+}
+
+type QuestChainToken_TransferBatch {
+  id: ID!
+  operator: String!
+  from: String!
+  to: String!
+  ids: [BigInt!]!
+  values: [BigInt!]!
+}
+
+type QuestChainToken_TransferSingle {
+  id: ID!
+  operator: String!
+  from: String!
+  to: String!
+  event_id: BigInt!
+  value: BigInt!
+}
+
+type QuestChainToken_URI {
+  id: ID!
+  value: String!
+  event_id: BigInt!
+}
+

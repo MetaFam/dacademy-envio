@@ -4,13 +4,14 @@ type Book {
   slug: String!
   title: String!
   introduction: String
-  Chapters: [Chapter!]! @derivedFrom(field: "id")
+  chapters: [Chapter!]! @derivedFrom(field: "book")
   updatedAt: Timestamp
   contract: Bytes
   nft: NFT
   creator: Bytes
   owners: [Bytes!]
-  reader: Bytes
+  createdAt: Timestamp
+  source: String
 }
 
 type NFT {
@@ -22,10 +23,12 @@ type NFT {
 
 type Chapter {
   id: ID!
-  optional: Boolean
   title: String
   content: String
+  optional: Boolean
   status: ChapterStatus
+  book: Book!
+  source: String!
 }
 
 enum ChapterStatus {

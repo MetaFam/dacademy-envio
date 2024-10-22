@@ -32,6 +32,88 @@ import {
   QuestChainToken_URI,
 } from "generated"
 
+/* Quest Chain Factory */
+
+QuestChainFactory.AdminReplaceProposed.handler(async ({ event, context }) => {
+  const entity: QuestChainFactory_AdminReplaceProposed = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    proposedAdmin: event.params.proposedAdmin,
+  }
+
+  context.QuestChainFactory_AdminReplaceProposed.set(entity)
+})
+
+QuestChainFactory.AdminReplaced.handler(async ({ event, context }) => {
+  const entity: QuestChainFactory_AdminReplaced = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    admin: event.params.admin,
+  }
+
+  context.QuestChainFactory_AdminReplaced.set(entity)
+})
+
+QuestChainFactory.PaymentTokenReplaceProposed.handler(async ({ event, context }) => {
+  const entity: QuestChainFactory_PaymentTokenReplaceProposed = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    proposedPaymentToken: event.params.proposedPaymentToken,
+  }
+
+  context.QuestChainFactory_PaymentTokenReplaceProposed.set(entity)
+})
+
+QuestChainFactory.PaymentTokenReplaced.handler(async ({ event, context }) => {
+  const entity: QuestChainFactory_PaymentTokenReplaced = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    paymentToken: event.params.paymentToken,
+  }
+
+  context.QuestChainFactory_PaymentTokenReplaced.set(entity)
+})
+
+QuestChainFactory.QuestChainCreated.handler(async ({ event, context }) => {
+  const entity: QuestChainFactory_QuestChainCreated = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    index: event.params.index,
+    questChain: event.params.questChain,
+  }
+
+  context.QuestChainFactory_QuestChainCreated.set(entity)
+})
+
+QuestChainFactory.QuestChainCreated.contractRegister(({ event, context }) => {
+  context.addQuestChain(event.params.questChain)
+})
+
+QuestChainFactory.QuestChainUpgraded.handler(async ({ event, context }) => {
+  const entity: QuestChainFactory_QuestChainUpgraded = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    sender: event.params.sender,
+    questChain: event.params.questChain,
+  }
+
+  context.QuestChainFactory_QuestChainUpgraded.set(entity)
+})
+
+QuestChainFactory.UpgradeFeeReplaceProposed.handler(async ({ event, context }) => {
+  const entity: QuestChainFactory_UpgradeFeeReplaceProposed = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    proposedUpgradeFee: event.params.proposedUpgradeFee,
+  }
+
+  context.QuestChainFactory_UpgradeFeeReplaceProposed.set(entity)
+})
+
+QuestChainFactory.UpgradeFeeReplaced.handler(async ({ event, context }) => {
+  const entity: QuestChainFactory_UpgradeFeeReplaced = {
+    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+    upgradeFee: event.params.upgradeFee,
+  }
+
+  context.QuestChainFactory_UpgradeFeeReplaced.set(entity)
+})
+
+/* Quest Chain */
+
 QuestChain.Initialized.handler(async ({ event, context }) => {
   const entity: QuestChain_Initialized = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
@@ -60,6 +142,23 @@ QuestChain.QuestChainEdited.handler(async ({ event, context }) => {
   context.QuestChain_QuestChainEdited.set(entity)
 })
 
+type ChapterBase = {
+  name: string
+  description: string
+}
+
+type BookBase = {
+  name: string
+  description: string
+  slug: string
+  categories: Array<string>
+}
+
+
+const toHTTP = (url: string) => (
+  url.replace(/^ipfs:\/\//, 'https://w3s.link/ipfs/')
+)
+
 QuestChain.QuestChainInit.handler(async ({ event, context }) => {
   const entity: QuestChain_QuestChainInit = {
     id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
@@ -69,6 +168,30 @@ QuestChain.QuestChainInit.handler(async ({ event, context }) => {
   }
 
   context.QuestChain_QuestChainInit.set(entity)
+
+  const res = await fetch(toHTTP(entity.details))
+  const { name, description, slug, categories } = await res.json() as BookBase
+  context.Book.set({
+    title: name,
+    introduction: description,
+    slug,
+    creator: event.transaction.from,
+    createdAt: event.block.timestamp,
+    source: entity.details,
+  })
+
+  await Promise.all(
+    entity.quests.map(async (url) => {
+      const res = await fetch(toHTTP(url))
+      const { name, description } = await res.json() as ChapterBase
+      context.Chapter.set({
+        title: name,
+        content: description,
+        optional: false,
+        source: url,
+      })
+    })
+  )
 })
 
 QuestChain.QuestChainTokenURIUpdated.handler(async ({ event, context }) => {
@@ -163,83 +286,7 @@ QuestChain.Unpaused.handler(async ({ event, context }) => {
   context.QuestChain_Unpaused.set(entity)
 })
 
-QuestChainFactory.AdminReplaceProposed.handler(async ({ event, context }) => {
-  const entity: QuestChainFactory_AdminReplaceProposed = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    proposedAdmin: event.params.proposedAdmin,
-  }
-
-  context.QuestChainFactory_AdminReplaceProposed.set(entity)
-})
-
-QuestChainFactory.AdminReplaced.handler(async ({ event, context }) => {
-  const entity: QuestChainFactory_AdminReplaced = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    admin: event.params.admin,
-  }
-
-  context.QuestChainFactory_AdminReplaced.set(entity)
-})
-
-QuestChainFactory.PaymentTokenReplaceProposed.handler(async ({ event, context }) => {
-  const entity: QuestChainFactory_PaymentTokenReplaceProposed = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    proposedPaymentToken: event.params.proposedPaymentToken,
-  }
-
-  context.QuestChainFactory_PaymentTokenReplaceProposed.set(entity)
-})
-
-QuestChainFactory.PaymentTokenReplaced.handler(async ({ event, context }) => {
-  const entity: QuestChainFactory_PaymentTokenReplaced = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    paymentToken: event.params.paymentToken,
-  }
-
-  context.QuestChainFactory_PaymentTokenReplaced.set(entity)
-})
-
-QuestChainFactory.QuestChainCreated.handler(async ({ event, context }) => {
-  const entity: QuestChainFactory_QuestChainCreated = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    index: event.params.index,
-    questChain: event.params.questChain,
-  }
-
-  context.QuestChainFactory_QuestChainCreated.set(entity)
-})
-
-QuestChainFactory.QuestChainCreated.contractRegister(({ event, context }) => {
-  context.addQuestChain(event.params.questChain)
-})
-
-QuestChainFactory.QuestChainUpgraded.handler(async ({ event, context }) => {
-  const entity: QuestChainFactory_QuestChainUpgraded = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    sender: event.params.sender,
-    questChain: event.params.questChain,
-  }
-
-  context.QuestChainFactory_QuestChainUpgraded.set(entity)
-})
-
-QuestChainFactory.UpgradeFeeReplaceProposed.handler(async ({ event, context }) => {
-  const entity: QuestChainFactory_UpgradeFeeReplaceProposed = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    proposedUpgradeFee: event.params.proposedUpgradeFee,
-  }
-
-  context.QuestChainFactory_UpgradeFeeReplaceProposed.set(entity)
-})
-
-QuestChainFactory.UpgradeFeeReplaced.handler(async ({ event, context }) => {
-  const entity: QuestChainFactory_UpgradeFeeReplaced = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    upgradeFee: event.params.upgradeFee,
-  }
-
-  context.QuestChainFactory_UpgradeFeeReplaced.set(entity)
-})
+/* Quest Chain Token */
 
 QuestChainToken.ApprovalForAll.handler(async ({ event, context }) => {
   const entity: QuestChainToken_ApprovalForAll = {

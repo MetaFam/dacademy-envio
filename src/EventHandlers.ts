@@ -169,26 +169,48 @@ QuestChain.QuestChainInit.handler(async ({ event, context }) => {
 
   context.QuestChain_QuestChainInit.set(entity)
 
+  console.debug({ tx: event.transaction })
+
+  const { contractAddress: contract, from: creator } = (
+    event.transaction
+  )
+  console.debug({ tx: event.transaction, contract, creator })
   const res = await fetch(toHTTP(entity.details))
   const { name, description, slug, categories } = await res.json() as BookBase
+  const now = new Date(event.block.timestamp)
+  if(!contract) {
+    throw new Error('Contract address not found.')
+  }
+  if(!creator) {
+    throw new Error('Creator address not found.')
+  }
   context.Book.set({
+    id: contract,
     title: name,
     introduction: description,
     slug,
-    creator: event.transaction.from,
-    createdAt: event.block.timestamp,
+    creator,
+    createdAt: now,
+    updatedAt: now,
     source: entity.details,
+    contract,
+    nft_id: undefined,
+    owners: [creator],
+    status: 'created',
   })
 
   await Promise.all(
-    entity.quests.map(async (url) => {
+    entity.quests.map(async (url, idx) => {
       const res = await fetch(toHTTP(url))
       const { name, description } = await res.json() as ChapterBase
       context.Chapter.set({
+        id: `${contract}_${idx}`,
         title: name,
+        book_id: contract,
         content: description,
         optional: false,
         source: url,
+        status: 'created',
       })
     })
   )

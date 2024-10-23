@@ -32,10 +32,11 @@ type Chapter {
 }
 
 enum ChapterStatus {
-  PASS
-  FAIL
-  REVIEW
-  INIT
+  pass
+  fail
+  review
+  init
+  created
 }
 
 type QuestChain_Initialized {

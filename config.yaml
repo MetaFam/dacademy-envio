@@ -46,6 +46,7 @@ networks:
     - event: URI(string value, uint256 indexed id)
 field_selection:
   transaction_fields:
-  - from
-  - contractAddress
+    - from
+    - "contractAddress"
+    - to
 rollback_on_reorg: false

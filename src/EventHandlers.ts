@@ -81,6 +81,7 @@ QuestChainFactory.QuestChainCreated.handler(async ({ event, context }) => {
 })
 
 QuestChainFactory.QuestChainCreated.contractRegister(({ event, context }) => {
+  console.debug({ register: event.params.questChain })
   context.addQuestChain(event.params.questChain)
 })
 
@@ -155,9 +156,14 @@ type BookBase = {
 }
 
 
-const toHTTP = (url: string) => (
-  url.replace(/^ipfs:\/\//, 'https://w3s.link/ipfs/')
-)
+const toHTTP = (url: string) => {
+  const prefix = 'https://w3s.link/ipfs/'
+  let out = url.replace(/^ipfs:\/\//, prefix)
+  if(!out.includes('://')) {
+    out = `${prefix}${out}`
+  }
+  return out
+}
 
 QuestChain.QuestChainInit.handler(async ({ event, context }) => {
   const entity: QuestChain_QuestChainInit = {
@@ -169,12 +175,11 @@ QuestChain.QuestChainInit.handler(async ({ event, context }) => {
 
   context.QuestChain_QuestChainInit.set(entity)
 
-  console.debug({ tx: event.transaction })
-
-  const { contractAddress: contract, from: creator } = (
-    event.transaction
+  const { srcAddress: checksummedContract, transaction: { from: creator } } = (
+    event
   )
-  console.debug({ tx: event.transaction, contract, creator })
+  const contract = checksummedContract.toLowerCase()
+
   const res = await fetch(toHTTP(entity.details))
   const { name, description, slug, categories } = await res.json() as BookBase
   const now = new Date(event.block.timestamp)
@@ -184,6 +189,7 @@ QuestChain.QuestChainInit.handler(async ({ event, context }) => {
   if(!creator) {
     throw new Error('Creator address not found.')
   }
+
   context.Book.set({
     id: contract,
     title: name,
@@ -199,19 +205,37 @@ QuestChain.QuestChainInit.handler(async ({ event, context }) => {
     status: 'created',
   })
 
-  await Promise.all(
+  await Promise.allSettled(
     entity.quests.map(async (url, idx) => {
-      const res = await fetch(toHTTP(url))
-      const { name, description } = await res.json() as ChapterBase
-      context.Chapter.set({
-        id: `${contract}_${idx}`,
-        title: name,
-        book_id: contract,
-        content: description,
-        optional: false,
-        source: url,
-        status: 'created',
-      })
+      try {
+        const res = await fetch(toHTTP(url))
+        if(!res.ok) {
+          throw new Error(`Respoonse not ok: ${res.status} (${url})`)
+        }
+        const { name, description } = await res.json() as ChapterBase
+        context.Chapter.set({
+          id: `${contract}_${idx + 1}`,
+          title: name,
+          book_id: contract,
+          content: description,
+          optional: false,
+          source: url,
+          status: 'created',
+          editedAt: undefined,
+        })
+      } catch(error) {
+        console.error({ error })
+        context.Chapter.set({
+          id: `${contract}_${idx + 1}`,
+          title: 'Bad URL!',
+          book_id: contract,
+          content: 'Bad URL!',
+          optional: false,
+          source: url,
+          status: 'created',
+          editedAt: undefined,
+        })
+      }
     })
   )
 })
@@ -255,6 +279,43 @@ QuestChain.QuestsEdited.handler(async ({ event, context }) => {
   }
 
   context.QuestChain_QuestsEdited.set(entity)
+
+  const { srcAddress: checksummedContract } = event
+  const contract = checksummedContract.toLowerCase()
+
+  await Promise.allSettled(
+    event.params.detailsList.map(async (cid, idx) => {
+      try {
+        const chapterId = event.params.questIdList[idx]
+        const id = `${contract}_${chapterId + 1n}`
+        const chapter = await context.Chapter.get(id)
+
+        if(!chapter) {
+          throw new Error(`Chapter not found: ${id}`)
+        }
+
+        let source = cid
+        if(!cid.includes('://')) {
+          source = `ipfs://${cid}`
+        }
+
+        const res = await fetch(toHTTP(cid))
+        if(!res.ok) {
+          throw new Error(`Response not ok: ${res.status} (${cid})`)
+        }
+        const { name, description } = await res.json() as ChapterBase
+        context.Chapter.set({
+          ...chapter,
+          title: name,
+          content: description,
+          editedAt: new Date(event.block.timestamp),
+          source,
+        })
+      } catch(error) {
+        console.error({ error })
+      }
+    })
+  )
 })
 
 QuestChain.RoleAdminChanged.handler(async ({ event, context }) => {

@@ -29,6 +29,7 @@ type Chapter {
   status: ChapterStatus
   book: Book!
   source: String!
+  editedAt: Timestamp
 }
 
 enum ChapterStatus {

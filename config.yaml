@@ -47,6 +47,6 @@ networks:
 field_selection:
   transaction_fields:
     - from
-    - "contractAddress"
     - to
+  block_fields:
 rollback_on_reorg: false

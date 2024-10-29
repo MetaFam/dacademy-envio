@@ -29,6 +29,7 @@ networks:
     - event: QuestChainTokenURIUpdated(string tokenURI)
     - event: QuestProofsSubmitted(address quester, uint256[] questIdList, string[] proofList)
     - event: QuestsCreated(address creator, string[] detailsList)
+    - event: ConfigureQuests(uint256[] ids, tuple[] details)
     - event: QuestsEdited(address editor, uint256[] questIdList, string[] detailsList)
     - event: RoleAdminChanged(bytes32 indexed role, bytes32 indexed previousAdminRole, bytes32 indexed newAdminRole)
     - event: RoleGranted(bytes32 indexed role, address indexed account, address indexed sender)

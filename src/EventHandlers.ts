@@ -81,7 +81,6 @@ QuestChainFactory.QuestChainCreated.handler(async ({ event, context }) => {
 })
 
 QuestChainFactory.QuestChainCreated.contractRegister(({ event, context }) => {
-  console.debug({ register: event.params.questChain })
   context.addQuestChain(event.params.questChain)
 })
 
@@ -210,7 +209,7 @@ QuestChain.QuestChainInit.handler(async ({ event, context }) => {
       try {
         const res = await fetch(toHTTP(url))
         if(!res.ok) {
-          throw new Error(`Respoonse not ok: ${res.status} (${url})`)
+          throw new Error(`Response not ok: ${res.status} (${url})`)
         }
         const { name, description } = await res.json() as ChapterBase
         context.Chapter.set({
@@ -268,6 +267,10 @@ QuestChain.QuestsCreated.handler(async ({ event, context }) => {
   }
 
   context.QuestChain_QuestsCreated.set(entity)
+})
+
+QuestChain.ConfigureQuests.handler(async ({ event, context }) => {
+  console.debug({ event })
 })
 
 QuestChain.QuestsEdited.handler(async ({ event, context }) => {

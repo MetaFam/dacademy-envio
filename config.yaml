@@ -1,5 +1,6 @@
 # yaml-language-server: $schema=./node_modules/envio/evm.schema.json
 name: envio-indexer
+event_decoder: viem
 networks:
 - id: 10
   start_block: 0

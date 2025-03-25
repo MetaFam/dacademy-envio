@@ -165,78 +165,86 @@ const toHTTP = (url: string) => {
 }
 
 QuestChain.QuestChainInit.handler(async ({ event, context }) => {
-  const entity: QuestChain_QuestChainInit = {
-    id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
-    details: event.params.details,
-    quests: event.params.quests,
-    paused: event.params.paused,
-  }
+  try {
+    const entity: QuestChain_QuestChainInit = {
+      id: `${event.chainId}_${event.block.number}_${event.logIndex}`,
+      details: event.params.details,
+      quests: event.params.quests,
+      paused: event.params.paused,
+    }
 
-  context.QuestChain_QuestChainInit.set(entity)
+    context.QuestChain_QuestChainInit.set(entity)
 
-  const { srcAddress: checksummedContract, transaction: { from: creator } } = (
-    event
-  )
-  const contract = checksummedContract.toLowerCase()
+    const { srcAddress: checksummedContract, transaction: { from: creator } } = (
+      event
+    )
+    const contract = checksummedContract.toLowerCase()
 
-  const res = await fetch(toHTTP(entity.details))
-  const { name, description, slug, categories } = await res.json() as BookBase
-  const now = new Date(event.block.timestamp)
-  if(!contract) {
-    throw new Error('Contract address not found.')
-  }
-  if(!creator) {
-    throw new Error('Creator address not found.')
-  }
+    console.debug({ 'Loading Book': entity })
+    const res = await fetch(toHTTP(entity.details))
+    const { name, description, slug, categories } = await res.json() as BookBase
+    const now = new Date(event.block.timestamp)
+    if(!slug) {
+      throw new Error(`No slug for book "${name}" from ${entity.details}.`)
+    }
+    if(!contract) {
+      throw new Error('Contract address not found.')
+    }
+    if(!creator) {
+      throw new Error('Creator address not found.')
+    }
 
-  context.Book.set({
-    id: contract,
-    title: name,
-    introduction: description,
-    slug,
-    creator,
-    createdAt: now,
-    updatedAt: now,
-    source: entity.details,
-    contract,
-    nft_id: undefined,
-    owners: [creator],
-    status: 'created',
-  })
-
-  await Promise.allSettled(
-    entity.quests.map(async (url, idx) => {
-      try {
-        const res = await fetch(toHTTP(url))
-        if(!res.ok) {
-          throw new Error(`Response not ok: ${res.status} (${url})`)
-        }
-        const { name, description } = await res.json() as ChapterBase
-        context.Chapter.set({
-          id: `${contract}_${idx + 1}`,
-          title: name,
-          book_id: contract,
-          content: description,
-          optional: false,
-          source: url,
-          status: 'created',
-          editedAt: undefined,
-        })
-      } catch(error) {
-        console.error({ error })
-        context.Chapter.set({
-          id: `${contract}_${idx + 1}`,
-          title: 'Bad URL!',
-          book_id: contract,
-          content: 'Bad URL!',
-          optional: false,
-          source: url,
-          status: 'created',
-          editedAt: undefined,
-        })
-      }
+    context.Book.set({
+      id: contract,
+      title: name,
+      introduction: description,
+      slug,
+      creator,
+      createdAt: now,
+      updatedAt: now,
+      source: entity.details,
+      contract,
+      nft_id: undefined,
+      owners: [creator],
+      status: 'created',
     })
-  )
+
+    await Promise.allSettled(
+      entity.quests.map(async (url, idx) => {
+        try {
+          const res = await fetch(toHTTP(url))
+          if(!res.ok) {
+            throw new Error(`Response not ok: ${res.status} (${url})`)
+          }
+          const { name, description } = await res.json() as ChapterBase
+          context.Chapter.set({
+            id: `${contract}_${idx + 1}`,
+            title: name,
+            book_id: contract,
+            content: description,
+            optional: false,
+            source: url,
+            status: 'created',
+            editedAt: undefined,
+          })
+        } catch(error) {
+          console.error({ error })
+          context.Chapter.set({
+            id: `${contract}_${idx + 1}`,
+            title: 'Bad URL!',
+            book_id: contract,
+            content: 'Bad URL!',
+            optional: false,
+            source: url,
+            status: 'created',
+            editedAt: undefined,
+          })
+        }
+      })
+    )
+  } catch(error) {
+    console.error({ error })
+  }
 })
 
 QuestChain.QuestChainTokenURIUpdated.handler(async ({ event, context }) => {
